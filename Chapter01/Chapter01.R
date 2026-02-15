@@ -65,10 +65,6 @@ print(mean_value)
 total_sum <- sum(c(1, 2, 3, 4, 5))
 print(total_sum)
 
-# Summing up elements of a vector
-total_sum <- sum(c(1, 2, 3, 4, 5))
-print(total_sum)
-
 # Generating a sequence of numbers
 number_sequence <- seq(from = 1, to = 10, by = 2)
 print(number_sequence)

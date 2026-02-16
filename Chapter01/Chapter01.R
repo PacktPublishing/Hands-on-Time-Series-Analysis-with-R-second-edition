@@ -73,7 +73,7 @@ print(number_sequence)
 sorted_vector <- sort(c(5, 2, 3, 4, 1))
 print(sorted_vector)
 
-# Squaring Numbers Using sapply:
-# Applying a function to each element of a vector (square numbers)
-squared_vector <- sapply(c(1, 2, 3, 4, 5), function(x) x^2)
-print(squared_vector)
+# Calculating Square Root for Numbers in a Vector Using sapply:
+# Applying sqrt function to each element of a vector (square root numbers)
+sqrt_vector <- sapply(c(1, 4, 9, 16, 25), sqrt)
+print(sqrt_vector)

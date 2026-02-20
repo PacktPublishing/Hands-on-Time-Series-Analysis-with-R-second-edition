@@ -1,3 +1,7 @@
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 02 Code
+#
+
 # Creating dummy data for your time series
 my_data <- data.frame(
   Date = seq(as.Date("2020-01-01"), as.Date("2020-12-01"), by = "month"),
@@ -15,8 +19,12 @@ summary(my_time_series)
 # Plotting the time series
 plot(my_time_series, main = "My First Time Series Plot", xlab = "Time", ylab = "Observations")
 
+# Check if the zoo package is already installed
+if (!requireNamespace("zoo", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("zoo")
+}
 # Load the zoo package
-install.packages("zoo")
 library(zoo)
 
 # Assuming your data is in 'my_data' with 'dates' as your date column
@@ -24,8 +32,12 @@ zoo_object <- zoo(my_data$Value, order.by = my_data$Date)
 print(zoo_object)
 # Comments: Creates a zoo object from your data, ordering by the date
 
+# Check if the xts package is already installed
+if (!requireNamespace("xts", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("xts")
+}
 # Load the xts package
-install.packages("xts")
 library(xts)
 
 # Convert to xts object
@@ -38,7 +50,12 @@ plot(zoo_object, main = "Stock Price Over Time", xlab = "Date", ylab = "Price")
 # Advanced xts plotting
 plot.xts(xts_object, main = "Detailed Stock Price Analysis")
 
-install.packages("quantmod")  # If not already installed
+# Check if the quantmod package is already installed
+if (!requireNamespace("quantmod", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("quantmod")
+}
+# load the quantmod package
 library(quantmod)
 
 # Specify the symbol for Bitcoin from Yahoo Finance (BTC-USD)
@@ -61,11 +78,8 @@ average_monthly_prices <- apply.monthly(btc_data, FUN = colMeans)
 # View the average monthly prices
 print(average_monthly_prices)
 
-# Filling daily data from monthly averages with linear interpolation
-filled_daily_data <- na.approx(apply.monthly(monthly_sales_data, to.daily))
-
 # Create dummy monthly data (you can replace this with actual data) library(xts) 
-dates <- seq(as.Date("2023-01-01"), as.Date("2023-12-01"), by = "month") 
+dates <- seq(as.Date("2023-01-01"), as.Date("2023-12-01"), by = "month")
 monthly_sales_data <- xts(runif(12, 1000, 2000), order.by = dates)
 
 # Resample the monthly data to daily frequency and fill missing values using linear interpolation 

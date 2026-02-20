@@ -1,3 +1,7 @@
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 01 Code
+#
+
 # Assigning a value to a variable
 x <- 5
 print(x)

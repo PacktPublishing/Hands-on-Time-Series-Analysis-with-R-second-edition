@@ -4,9 +4,10 @@
 
 # Assigning a value to a variable
 x <- 5
-print(x)
+print(x) #print the value of x in console output
 
 # Basic arithmetic in R
+# contents after # is code comments
 sum <- 5 + 3 # Adds 5 and 3
 difference <- 10 - 2 # Subtracts 2 from 10
 product <- 4 * 2 # Multiplies 4 and 2
@@ -24,9 +25,9 @@ print(character_vector)
 
 # Creating a 3x3 matrix with numbers 1 to 9
 my_matrix <- matrix(1:9, nrow=3, ncol=3)
-print(my_matrix)
+print(my_matrix)  #print my_matrix in console output
 
-# Creating a data frame with names, ages, and salaries
+# Creating a data frame with Columns: Name, Age, and Salary
 my_data_frame <- data.frame(
   Name = c("Alice", "Bob", "Charlie"),
   Age = c(25, 30, 35),
@@ -65,9 +66,9 @@ print(modulus_result)
 mean_value <- mean(c(1, 2, 3, 4, 5))
 print(mean_value)
 
-# Summing up elements of a vector
-total_sum <- sum(c(1, 2, 3, 4, 5))
-print(total_sum)
+# Summing up elements of a vector created by c()
+sum_value <- sum(c(1, 2, 3, 4, 5))
+print(sum_value)
 
 # Generating a sequence of numbers
 number_sequence <- seq(from = 1, to = 10, by = 2)

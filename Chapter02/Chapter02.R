@@ -62,9 +62,12 @@ library(quantmod)
 getSymbols("BTC-USD", src = "yahoo", from = "2023-01-01", to = "2023-12-31", auto.assign = TRUE)
 
 # View the data (Closing prices)
-btc_data <- Cl(`BTC-USD`)  # Cl() extracts the closing prices
+# Cl(x) extracts the closing prices 
+# You can use Hi(x), Lo(x) to extract high, low prices accordingly 
+# Check the R Documentation e.g. ?Cl()  
+btc_data <- Cl(`BTC-USD`)
 
-# Assuming 'btc_data' is an xts time series object of daily stock prices
+# 'btc_data' is an xts time series object of daily stock prices
 specific_day_price <- btc_data['2023-03-15']
 specific_day_price
 
@@ -81,8 +84,12 @@ print(average_monthly_prices)
 # Create dummy monthly data (you can replace this with actual data) library(xts) 
 dates <- seq(as.Date("2023-01-01"), as.Date("2023-12-01"), by = "month")
 monthly_sales_data <- xts(runif(12, 1000, 2000), order.by = dates)
+print(monthly_sales_data)
 
-# Resample the monthly data to daily frequency and fill missing values using linear interpolation 
+# Resample the monthly data to daily frequency
+# Use to.daily() function to convert to daily frequency 
+# daily frequency contains Open,High,Low,Close, we use x$Close to get close prices 
+# na.approx function will replace NA by interpolation  
 filled_daily_data <- na.approx(to.daily(monthly_sales_data)$monthly_sales_data.Close) 
 
 # View the filled daily data 

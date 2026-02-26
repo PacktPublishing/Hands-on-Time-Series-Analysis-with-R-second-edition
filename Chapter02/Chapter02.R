@@ -87,10 +87,17 @@ monthly_sales_data <- xts(runif(12, 1000, 2000), order.by = dates)
 print(monthly_sales_data)
 
 # Resample the monthly data to daily frequency
-# Use to.daily() function to convert to daily frequency 
-# daily frequency contains Open,High,Low,Close, we use x$Close to get close prices 
+# Use to.daily(x) function to convert to daily frequency 
+daily_sales_data <- to.daily(monthly_sales_data)
+print(daily_sales_data)
+
+# daily frequency contains Open,High,Low,Close, we use x$Close to get close prices
+# here monthly_sales_data.Close is the field name 
+daily_data_close <- daily_sales_data$monthly_sales_data.Close
+print(daily_data_close)
+
 # na.approx function will replace NA by interpolation  
-filled_daily_data <- na.approx(to.daily(monthly_sales_data)$monthly_sales_data.Close) 
+filled_daily_data <- na.approx(daily_data_close) 
 
 # View the filled daily data 
 print(filled_daily_data)

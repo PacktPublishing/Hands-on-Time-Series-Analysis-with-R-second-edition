@@ -1,3 +1,7 @@
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 03 Code
+#
+
 # Convert a string to a Date object
 my_date <- as.Date("2023-04-15")
 print(my_date)
@@ -33,6 +37,7 @@ print(current_time_lt)
 
 # Convert POSIXct to POSIXlt
 posixct_time <- Sys.time()
+print(posixct_time)
 posixlt_time <- as.POSIXlt(posixct_time)
 print(posixlt_time)
 
@@ -56,21 +61,21 @@ print(dst_date_before)
 dst_date_after <- as.POSIXct("2023-11-06 12:00:00", tz = "America/New_York")
 print(dst_date_after)
 
-# Display only the date
+# Display only the date in the format of Year-Month-Day 
 date_only <- format(Sys.time(), "%Y-%m-%d")
 print(date_only)
 
-# Display only the time
+# Display only the time in the format of Hour:Minute:Second
 time_only <- format(Sys.time(), "%H:%M:%S")
 print(time_only)
 
-# Format including time zone
+# Format including time zone with %Z
 datetime_tz <- format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")
 print(datetime_tz)
 
-# Format excluding seconds
-datetime_no_seconds <- format(Sys.time(), "%Y-%m-%d %H:%M")
-print(datetime_no_seconds)
+# Format excluding seconds and time zone 
+datetime_no_sec_no_tz <- format(Sys.time(), "%Y-%m-%d %H:%M")
+print(datetime_no_sec_no_tz)
 
 # Load the 'bitcoin_price.csv' as a CSV
 df = read.csv("bitcoin_price.csv")
@@ -80,12 +85,15 @@ df$Date <- as.Date(df$Date, format="%Y-%m-%d")
 print(df$Date)
 
 # Safe parsing with tryCatch to handle errors
-safe_parse_date <- function(date_string) {
+safe_parse_date <- function(date_string)
+{
   tryCatch(
     as.Date(date_string, format="%Y-%m-%d"),
     error=function(e) NA # Return NA on error
   )
 }
+
+# apply the safe parsing function to Date column 
 parsed_dates <- sapply(df$Date, safe_parse_date)
 
 # Formatting date-time for a user-friendly report
@@ -98,7 +106,7 @@ date_string <- "Monday, 21 March 2023 14:00"
 parsed_date <- strptime(date_string, format="%A, %d %B %Y %H:%M", tz="Europe/Berlin")
 print(parsed_date)
 
-# Define a standard date-time format for a project
+# Define a standard date-time format
 standard_datetime_format <- "%Y-%m-%d %H:%M:%S"
 # Function to format any date-time object according to the standard
 format_datetime <- function(datetime) {
@@ -110,6 +118,7 @@ formatted_time <- format_datetime(current_time)
 print(formatted_time)
 
 # Function to safely parse date-time strings with error handling
+# when parsing error occurs, it will generate a warning message and return NA
 safe_parse_datetime <- function(datetime_string) {
   tryCatch(
     as.POSIXct(datetime_string, format = "%Y-%m-%d %H:%M:%S"),
@@ -124,15 +133,13 @@ datetime_input <- "2023-02-30 12:00:00" # Incorrect date
 parsed_datetime <- safe_parse_datetime(datetime_input)
 print(parsed_datetime)
 
-# Assuming 'stock_prices' is a vector of daily closing stock prices
-daily_changes <- diff(stock_prices)
-
 # Apply 'diff' to compute the period-over-period return
 daily_changes <- diff(df$Adj.Close)
 print(daily_changes)
 
 # Example inflation rates for demonstration (use actual rates)
 inflation_rates <- rep(0.02, nrow(df)) # Assuming a constant 2% inflation for simplicity
+print(inflation_rates)
 
 # Adjusting the 'Adj.Close' for inflation
 real_data <- df$Adj.Close / (1 + inflation_rates)
@@ -157,11 +164,21 @@ weekly_median_prices <- rollmedian(df$Adj.Close, 7, fill = NA, align = "center")
 print(weekly_median_prices[1:5])
 
 # Adjusting the stock prices to account for weekend non-trading days
-#install.packages("dplyr")
+# Check if the dplyr package is already installed
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("dplyr")
+}
+# load package dplyr
 library(dplyr)
+
+# mutate function is used to create or modify a data frame column 
+# if_else(condition, true, false), here if the date is either Sat or Sun, set Close value to NA, otherwise use Adj.Close 
+# %>% is R forward pipe operator 
+# %in% is for value matching 
 adjusted_stock_data <- df %>%
   mutate(Adjusted.Close = if_else(weekdays(as.Date(Date)) %in% c("Saturday", "Sunday"), NA, Adj.Close))
-print(adjusted_stock_data[1:5])
+print(adjusted_stock_data)
 
 # Assuming 'public_holidays' includes Christmas and other holidays
 public_holidays <- c("2014-12-25") # Christmas in 2014

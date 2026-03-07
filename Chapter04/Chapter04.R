@@ -1,5 +1,10 @@
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 04 Code
+#
+
 # Create a sequence of dates for one month
 dates <- seq(as.Date("2024-01-01"), by="day", length.out=31)
+print(dates)
 
 # Simulate daily temperatures (in degrees Celsius)
 temperatures <- rnorm(31, mean=22, sd=3) # Random data centered around 22 degrees Celsius
@@ -30,8 +35,13 @@ plot(temperature_data$Date, temperature_data$Temperature, type="l", col="darkgre
 # Adjusting line types
 plot(temperature_data$Date, temperature_data$Temperature, type="l", lty=2, col="darkgreen")
 
+# Check if the ggplot2 package is already installed
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("ggplot2")
+}
+
 # Load ggplot2
-install.packages("ggplot2")
 library(ggplot2)
 
 # Example data frame
@@ -40,6 +50,7 @@ temp_data <- data.frame(
   Temperature = rnorm(30, mean = 20, sd = 5)
 )
 # Creating a line plot
+# the + operator added layer to the plot 
 ggplot(data = temp_data, aes(x = Date, y = Temperature)) +
   geom_line() +
   labs(title = "Daily Temperature Over Time",
@@ -51,7 +62,12 @@ ggplot(data = temp_data, aes(x = Date, y = Temperature)) +
 temp_data$Temperature2 = rnorm(30, mean = 15, sd = 5)
 
 # Melting data for ggplot2
-install.packages("reshape2")
+# Check if the reshape2 package is already installed
+if (!requireNamespace("reshape2", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("reshape2")
+}
+# load reshape2 package
 library(reshape2)
 temp_data_melted <- melt(temp_data, id.vars = "Date")
 
@@ -137,12 +153,25 @@ ggplot(temp_data, aes(x = Date, y = Temperature)) +
   geom_point(data = subset(temp_data, Temperature > 25), color = 'red')  # Red points for temperatures > 25°C
 
 # Converting a ggplot2 graph to an interactive Plotly graph
-install.packages("plotly")
+
+# Check if the plotly package is already installed
+if (!requireNamespace("plotly", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("plotly")
+}
+# load plotly package
 library(plotly)
 p <- ggplot(temp_data, aes(x = Date, y = Temperature)) + geom_line()  # Creating a basic ggplot2 plot
-ggplotly(p)  # Convert ggplot2 plot to a Plotly object
+ggplotly(p)  # Convert ggplot2 plot to a plotly object
 
-install.packages("shiny")
+
+# Check if the shiny package is already installed
+if (!requireNamespace("shiny", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("shiny")
+}
+
+# Load shiny
 library(shiny)
 
 ui <- fluidPage(
@@ -240,6 +269,32 @@ server <- function(input, output, session) {
 
 # Combine the UI and server to create the Shiny app
 shinyApp(ui = ui, server = server)
+
+# load quantmod package
+library(quantmod)
+
+# get google (GOOG is the ticker symbol) from yahoo finance
+# from date between 2023-01-01 to 2023-12-31
+
+getSymbols("GOOG", src = "yahoo", from = "2023-01-01", to = "2023-12-31", auto.assign = TRUE)
+
+# Create a data frame, use the Close price
+df <- data.frame(GOOG$GOOG.Close)
+head(df)
+
+# Create the data frame, use the date and close price series
+df <- data.frame(rownames(df),df)
+# append the colum names accordingly
+colnames(df) <- append('Date','Close')
+head(df)
+
+# Create a plotly figure, use the google data frame above
+# add_trace will add the layer
+
+goog_plotly  <- plot_ly(df, type = 'scatter', mode = 'lines')%>%
+  add_trace(x = df$Date, y = df$Close, name = 'GOOG')%>%
+  layout(showlegend = TRUE)
+goog_plotly
 
 # Create a ggplot2 time series plot
 p <- ggplot(data.frame(x = 1:100, y = cumsum(rnorm(100))), aes(x, y)) + geom_line()

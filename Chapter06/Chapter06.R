@@ -1,15 +1,23 @@
-# Load necessary libraries
-install.packages("readr")
-install.packages("tsibble")
-install.packages("feasts")
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 06 Code
+#
 
-library(ggplot2)
-library(forecast)
-library(TTR)
-library(readr)
-library(tsibble)
-library(feasts)
-library(dplyr)
+# The package list
+packages <- c("readr","tsibble","feasts", "ggplot2", "forecast", "TTR", "dplyr" )
+
+# Check if the package installed or not
+# If not installed, install the package
+
+for (p in packages) {
+  if (!requireNamespace(p, quietly = TRUE)) {
+    # If not installed, install them
+    install.packages(p)
+  
+  }
+  # Load the package accordingly
+  library(p, character.only = TRUE)
+}
+
 
 # Load the data
 df <- read_csv("weekly_customer_complaints.csv")
@@ -22,16 +30,25 @@ df <- df %>%
   mutate(week = yearweek(week)) %>%
   as_tsibble(index = week) %>%
   fill_gaps()
+head(df)
 
 # Plot the weekly customer complaints
 ggplot(df, aes(x = week, y = complaints)) +
   geom_line() +
   labs(title = "Weekly Customer Complaints")
 
-# Plotting the monthly seasonality
-df %>%
-  index_by(month = ~ yearmonth(.)) %>%
-  summarise(complaints = mean(complaints)) %>%
+
+month_df <- df %>%
+  index_by(month = ~ yearmonth(.))
+
+head(month_df)
+
+month_df<-  month_df %>%
+  summarise(complaints = mean(complaints)) 
+head(month_df)
+
+# Plotting the Monthly seasonality
+month_df %>%
   gg_season(complaints, labels = NULL) +  # remove or adjust labels
   labs(title = "Monthly Seasonality of Customer Complaints")
 
@@ -50,8 +67,11 @@ df$week <- as.Date(df$week)
 df <- df %>%
   as_tsibble(index = week)
 
-# Split the data into training and test sets
+# Load package and retrieve the max value of week
 library(lubridate)
+max_week <- max(df$week)
+
+# Split the data into training and test sets
 train <- df %>%
   filter(week < (max_week - weeks(periods)))  # Training set: before last 13 weeks
 
@@ -61,77 +81,77 @@ test <- df %>%
 # View the head of the test set
 head(test)
 
+
 # Convert df$complaints into a time series object
 complaints_ts <- ts(train$complaints, 
                     start = c(year(min(train$week)), week(min(train$week))),
                     frequency = 52)  # 52 for weekly data
 
-# Fit the model
+
+# Fit the simple exponential smoothing (SES) model
 model_simple <- forecast::ses(complaints_ts, h = periods)
 
 # Forecast
 predictions_simple <- forecast::forecast(model_simple, h = periods)
 
-# Plot training, test, and forecasts
+
 complaints_ts_test <- ts(test$complaints, 
                     start = c(year(min(test$week)), week(min(test$week))),
                     frequency = 52)  # 52 for weekly data
-autoplot(complaints_ts, series = "Train") +
+
+# Plot training, test, and forecasts
+autoplot(complaints_ts, series = "Train" ) +
   autolayer(complaints_ts_test, series = "Test") +
-  autolayer(predictions_simple, series = "Forecast") +
+  autolayer(predictions_simple, series = "Forecast", alpha=0.5) +
   labs(title = "Train, Test, and Predictions with Simple Exponential Smoothing") +
   theme_minimal()
 
 # Fit the model
 model_double <- holt(complaints_ts, damped = FALSE, h = periods)
+print(model_double$model)
+
 
 # Forecast
-predictions_double <- forecast::forecast(model_double, 
+predictions_double <- forecast::forecast(model_double,
                                          h = periods)
 
 # Plot training, test, and forecasts
 autoplot(complaints_ts, series = "Train") +
   autolayer(complaints_ts_test, series = "Test") +
-  autolayer(predictions_double, series = "Forecast") +
+  autolayer(predictions_double, series = "Forecast", alpha=0.5) +
   labs(title = "Train, Test, and Predictions with Double Exponential Smoothing") +
   theme_minimal()
 
+
 # Fit the model
 model_triple <- hw(complaints_ts, 
-                   seasonal = "additive",
+                   seasonal = "multiplicative",
                    h = periods)
 
 
-# Calculate the Mean Absolute Error (MAE)
-mae <- mean(abs(test$complaints - predictions_double$mean))
+# Fit the Holt's linear trend model (no seasonality)
+model_holt <- holt(complaints_ts , h = periods)
 
-# Calculate the Root Mean Squared Error (RMSE)
-rmse <- sqrt(mean((test$complaints - predictions_double$mean)^2))
+# Forecast the next 'periods'
+forecast_holt <- forecast(model_holt, h = periods)
 
-# Calculate the Mean Absolute Percentage Error (MAPE)
-mape <- mean(abs((test$complaints - predictions_double$mean) / test$complaints)) * 100
+# Plot the forecast
+plot(forecast_holt)
 
-cat(sprintf("The MAE is %.2f\n", mae))
-cat(sprintf("The RMSE is %.2f\n", rmse))
-cat(sprintf("The MAPE is %.2f%%\n", mape))
+# Retrieve error metrics 
+accuracy(forecast_holt)
+# Retrieve error metrics for test data
+accuracy(forecast_holt, test$complaints)
 
-# Step 1: Convert df$complaints into a time series object
-ts_full <- ts(df$complaints, start = c(year(min(df$week)), week(min(df$week))), frequency = 52)
-
-# Step 2: Fit the Holt's linear trend model (no seasonality)
-model_full <- holt(ts_full, h = periods)
-
-# Step 3: Forecast the next 'periods'
-forecast_full <- forecast(model_full, h = periods)
-
-# Step 4: Plot the forecast
-plot(forecast_full)
 
 # Load the daily data
 df_daily <- read_csv("bitcoin_price.csv")
 
-# Ensure the 'Date' column is in Date format
+# Set the date as the index and ensure it is of Date typ
 df_daily$Date <- as.Date(df_daily$Date)
+df_daily <- df_daily %>% as_tsibble(index = Date)
+
+
 
 # Define the number of periods you want to subtract (e.g., 30 days for 1 month)
 periods <- 30
@@ -139,27 +159,32 @@ periods <- 30
 # Find the max date in your data
 max_date <- max(df_daily$Date)
 
-# Step 1: Filter the data to create the training set, excluding the last 'periods' days
+# Filter the data to create the training set, excluding the last 'periods' days
 train_daily <- df_daily %>%
   filter(Date < (max_date - days(periods)))
 
-# Step 2: Filter the data to create the test set, including the last 'periods' days
+# Filter the data to create the test set, including the last 'periods' days
 test_daily <- df_daily %>%
-  filter(Date >= (max_date - days(periods)))
+  filter(Date >= (max_date+1 - days(periods)))
 
 # View the head of the test set to check
 head(test_daily)
 
-# Step 1: Convert train_daily$Close into a time series object (assuming daily data with weekly seasonality)
+# Convert train_daily$Close into a time series object (assuming daily data with weekly seasonality)
+min_date <- min(train_daily$Date)
+year_start <- year(min_date)
+day_start <- yday(min_date)
 ts_train_close <- ts(train_daily$Close, 
-                     frequency = 7,  # Weekly seasonality
-                     start = c(year(min(train_daily$Date)), yday(min(train_daily$Date))))
+                     # Weekly seasonality
+                     frequency = 7,  
+                     start = c(year_start, day_start))
 
-# Step 2: Fit the Holt-Winters model with multiplicative seasonality
+# Fit the Holt-Winters model with multiplicative seasonality
 model_daily_triple <- hw(ts_train_close, seasonal = "multiplicative", h = periods)
 
-# Step 3: Forecast the next periods
+# Forecast the next periods
 forecast_daily_triple <- forecast(model_daily_triple, h = periods)
 
 # Plot the forecast
 plot(forecast_daily_triple)
+

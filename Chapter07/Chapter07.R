@@ -1,11 +1,22 @@
-# Load necessary libraries
-install.packages("tidyverse")
-install.packages("TSA")
-library(tidyverse)
-library(ggplot2)
-library(forecast)
-library(lubridate)
-library(TSA)
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 07 Code
+#
+
+# The package list
+packages <- c("tidyverse", "ggplot2", "forecast", "lubridate", "TSA", "tseries" )
+
+# Check if the package installed or not
+# If not installed, install the package
+
+for (p in packages) {
+  if (!requireNamespace(p, quietly = TRUE)) {
+    # If not installed, install them
+    install.packages(p)
+    
+  }
+  # Load the package accordingly
+  library(p, character.only = TRUE)
+}
 
 # Load the data and set the date as index
 df <- read_csv("daily_revenue.csv", 
@@ -19,6 +30,7 @@ str(df)
 df <- df %>% 
   complete(date = seq.Date(min(date), max(date), by = "day")) %>% 
   fill(revenue)
+
 
 # Rename the revenue column to 'y'
 df <- df %>% 
@@ -85,6 +97,7 @@ head(df)
 
 # Plotting the original and differenced series
 par(mfrow = c(2, 1))
+
 # Plot original series
 plot(df$date, df$y, type = "l", col = "blue", main = "Original Time Series", xlab = "Date", ylab = "Revenue")
 legend("topright", legend = "Original Series", col = "blue", lty = 1)
@@ -166,6 +179,7 @@ predictions_sarima[1:5]
 
 # Model assessment
 model_assessment(train, test, predictions_sarima, "SARIMA")
+
 
 # Transform regressors into numeric
 df <- df %>%
@@ -266,8 +280,11 @@ param_grid <- expand.grid(
   Q = c(0, 1)         # Seasonal MA order (Q)
 )
 
+# Display how many rows
 nrow(param_grid)
 
+# Display the first couple rows
+head(param_grid)
 
 
 # Cross-validation function with error handling for singular matrices
@@ -378,6 +395,4 @@ cat(sprintf("Best RMSE is %.2f with parameters: p=%d, d=%d, q=%d, P=%d, D=%d, Q=
             tuning_results$best_params$q, tuning_results$best_params$P, tuning_results$best_params$D,
             tuning_results$best_params$Q))
 
-# Save the best parameters
-best_params <- tuning_results %>% filter(rmse == min(rmse)) %>% t()
-best_params
+

@@ -1,8 +1,16 @@
-# Install brms if you haven't already
-install.packages("brms")
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 09 Code
+#
 
-# Load the package
+
+# Check if the brms package is already installed
+if (!requireNamespace("brms", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("brms")
+}
+# Load the forecast package
 library(brms)
+
 
 # Assuming you have some time series data (e.g., sales data)
 data <- data.frame(
@@ -31,14 +39,12 @@ abline(v = mean(posterior_samples$b_Intercept), col = "red", lwd = 2)
 # New observed data
 new_y <- rnorm(12, mean = 115, sd = 10)  # New data points
 
-# Update data list
-data_list$y <- c(data_list$y, new_y)
-data_list$N <- length(data_list$y)
+
 
 # Refit model with new data
 fit_updated <- brm(
   sales ~ time,
-  data = data.frame(time = 1:data_list$N, sales = data_list$y),
+  data = data.frame(time = 1:length(new_y), sales = new_y),
   family = gaussian(),
   chains = 4, iter = 2000, warmup = 500
 )
@@ -126,9 +132,24 @@ fit_weakly_informative <- brm(
 # Print the results
 summary(fit_weakly_informative)
 
-# Install and load necessary packages
-library(bayesplot)  # For traceplot
-library(loo)  # For WAIC
+
+# The package list
+# loo For WAIC
+packages <- c("loo")
+
+# Check if the package installed or not
+# If not installed, install the package
+
+for (p in packages) {
+  if (!requireNamespace(p, quietly = TRUE)) {
+    # If not installed, install them
+    install.packages(p)
+    
+  }
+  # Load the package accordingly
+  library(p, character.only = TRUE)
+}
+
 
 # Posterior predictive checks
 posterior_predictive <- posterior_predict(fit_ar1)
@@ -139,9 +160,6 @@ for (i in 1:100) {
   lines(1:N, posterior_predictive[i, ], col = adjustcolor("red", alpha.f = 0.1))
 }
 lines(1:N, y, col = "blue", lwd = 2)
-
-# Convergence diagnostics using traceplot
-traceplot(fit_ar1)
 
 # Model comparison using WAIC
 waic_fit <- waic(fit_ar1)
@@ -169,6 +187,7 @@ data_arma$lag_error <- c(NA, diff(data_arma$y))  # MA(1) lagged error term
 
 # Remove the first row with NAs
 data_arma <- data_arma[-1,]
+
 
 # Define weakly informative priors for the model
 priors <- c(
@@ -208,6 +227,8 @@ for (i in 1:100) {
 }
 lines(1:nrow(data_arma), data_arma$y, col = "blue", lwd = 2)
 
+
+
 # Calculate residuals: difference between observed data and mean of posterior predictive samples
 residuals <- data_arma$y - apply(posterior_predictive, 2, mean)
 
@@ -239,33 +260,4 @@ loo_strong_prior <- loo(fit_strong_prior)
 # Compare models using LOO
 loo_compare(loo_weak_prior, loo_strong_prior)
 
-# Assuming the data is stored in 'data_arma'
-
-# Create Subset 1: First half of the dataset
-subset1_data <- data_arma[1:(nrow(data_arma) / 2), ]
-
-# Create Subset 2: Second half of the dataset
-subset2_data <- data_arma[((nrow(data_arma) / 2) + 1):nrow(data_arma), ]
-
-# Fit models on different subsets
-fit_subset1 <- brm(
-  bf(y ~ time + lag_y + lag_error), 
-  data = subset1_data,  # Subset 1 of the data
-  family = gaussian(), 
-  chains = 4, iter = 2000, warmup = 500
-)
-
-fit_subset2 <- brm(
-  bf(y ~ time + lag_y + lag_error), 
-  data = subset2_data,  # Subset 2 of the data
-  family = gaussian(),
-  chains = 4, iter = 2000, warmup = 500
-)
-
-# Compute the LOO criterion for both models
-fit_subset1 <- add_criterion(fit_subset1, "loo")
-fit_subset2 <- add_criterion(fit_subset2, "loo")
-
-# Compare models based on LOO
-loo_compare(fit_subset1, fit_subset2)
 

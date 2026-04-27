@@ -1,7 +1,8 @@
-# Example Top-Down Forecasting in R
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 10 Code
+#
 
-# Load necessary libraries
-library(forecast)
+# Example Top-Down Forecasting in R
 
 # Historical sales data by region
 historical_sales <- data.frame(
@@ -69,12 +70,24 @@ aggregated_category_forecasts <- aggregate(Product_Forecast ~ Category, data = p
 print(product_forecasts)
 print(aggregated_category_forecasts)
 
-install.packages("hts")
+
+# Check if the hts package is already installed
+if (!requireNamespace("hts", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("hts")
+}
+# Load the hts package
 library(hts)
 
-data(infantgts)
 
+data(infantgts)
+str(infantgts)
 plot(infantgts)
+     
+# set levels = 2 for State aggregation 
+# set levels = 1 to aggregate at Sex (male/female) 
+plot(infantgts, levels = 1)
+
 
 h <- 10  # Forecast horizon
 forecast_infant <- forecast(infantgts, h = h, method = "comb", fmethod = "arima")

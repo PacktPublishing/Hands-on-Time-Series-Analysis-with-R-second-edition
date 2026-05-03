@@ -1,12 +1,19 @@
-# Install the Prophet package from CRAN
-install.packages("prophet")
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 11 Code
+#
 
-# Load the Prophet library
+# Check if the prophet package is already installed
+if (!requireNamespace("prophet", quietly = TRUE)) {
+  # If not installed, install it
+  install.packages("prophet")
+}
+# Load the prophet package
 library(prophet)
 
 # Load the data from a CSV file
-data <- read.csv('Daily Bike Sharing training.csv')
+data <- read.csv('Daily_Bike_Sharing_training.csv')
 head(data)
+
 
 # Drop Variables That Are Not Needed
 library(dplyr)
@@ -60,7 +67,7 @@ m <- fit.prophet(m, data)
 regressors <- data %>% select(ds, holiday, workingday, weathersit, temp, atemp, hum, windspeed)
 
 # Import future regressors from a CSV
-future_regressors <- read.csv("Daily Bike Sharing future.csv")
+future_regressors <- read.csv("Daily_Bike_Sharing_future.csv")
 
 # Select only the necessary columns
 future_regressors_selected <- future_regressors %>%
@@ -79,6 +86,7 @@ tail(combined_data)
 
 # Generate forecasts for the future dates
 forecast <- predict(m, combined_data)
+
 
 # Creating a dataframe for holidays
 holidays <- data.frame(

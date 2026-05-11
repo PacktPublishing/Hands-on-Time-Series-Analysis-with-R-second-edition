@@ -1,6 +1,9 @@
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 12 Code
+#
+
 #libraries
 library(dplyr)
-library(ggplot2)
 library(forecast)
 
 #load the dataset
@@ -52,53 +55,6 @@ predictions = forecast(model, xreg = test_reg)
 accuracy(predictions$mean, test$y)
 
 
-######################## Cross-Validation ########
-
-#Generating Dates
-last_date = tail(df$Date, 1) - 30
-first_date = tail(df$Date, 1) - 200
-dates = seq.Date(from = first_date, 
-                 to = last_date,
-                 by = "week")
-
-#Results vector
-results_cv = vector(mode = 'numeric',
-                    length = length(dates))
-
-#Cross Validation
-
-for (j in 1:length(dates)) {
-  
-  #Training and test set
-  training = df %>% filter(Date <= dates[j])
-  test = df %>% filter(Date > dates[j] & Date <= (dates[j] + 31))
-  
-  #Time Series Object
-  training_y  = ts(training$y, frequency = 7)
-  
-  #Regressors
-  training_reg = as.matrix(training[, 3:ncol(training)])
-  test_reg = as.matrix(test[, 3:ncol(test)])
-  
-  #Model
-  model = nnetar(y = training_y,
-                 p = 1,
-                 P = 1,
-                 decay = 0.1,
-                 size = 3,
-                 xreg = training_reg)
-  
-  #Predictions
-  predictions = forecast(model, xreg = test_reg)
-  
-  #Accuracy
-  results_cv[j] = accuracy(predictions$mean, test$y)[1,2]
-  print(dates[j])
-  
-}
-
-#Get the results
-mean(results_cv)
 
 ###################### Parameter tuning ###############
 
@@ -155,7 +111,7 @@ for (i in seq_len(nrow(Grid))) {
     #Accuracy
     results_cv[j] = accuracy(predictions$mean, test$y)[1,2]
     print(dates[j])
-    
+
   }
   
   #Store Results Grid
@@ -166,3 +122,4 @@ for (i in seq_len(nrow(Grid))) {
 #Fetch the best parameters
 Grid = cbind(Grid, results_grid)
 best_params = Grid[Grid$results_grid == min(results_grid), ]
+print(best_params)

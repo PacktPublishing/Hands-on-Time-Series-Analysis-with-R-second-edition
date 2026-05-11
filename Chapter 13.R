@@ -1,3 +1,8 @@
+# Hands-on Time Series Analysis with R second Edition
+# Chapter 13 Code
+#
+
+
 # Install and load torch
 install.packages("torch")
 library(torch)
@@ -116,3 +121,4 @@ print(paste("Test RMSE:", rmse))
 plot(actual_values, type = "l", col = "blue", main = "LSTM Predictions vs Actual", ylab = "y")
 lines(predicted_values, col = "red")
 legend("topright", legend = c("Actual", "Predicted"), col = c("blue", "red"), lty = 1)
+
